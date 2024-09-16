@@ -1,0 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Allura&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100;0,300;0,400;0,500;0,700;0,900;1,100;1,300;1,400;1,500;1,700;1,900&display=swap');
+
+// colors
+$gold: linear-gradient(to right, #AE8625 0, #F7EF8A 32%, #D2AC47 75%, #EDC967 100%);
+$black: #28282B;
+$white: #EEF1EA;
+$danger: #ff595e;
+$bg: linear-gradient(to bottom, #F0E9DB, #f0e9db00),
+	linear-gradient(to right, #DEC79B, #dec79b00),
+	#D3C5AA;
+
+// fonts
+$allura: "Allura", cursive;
+$roboto: "Roboto", sans-serif;
+
+
+
+
+//mixins
+
+@mixin allura {
+	font-family: "Allura", cursive;
+	font-weight: 400;
+	font-style: normal;
+}
+
+@mixin text-gold {
+	background: $gold;
+	-webkit-text-fill-color: transparent;
+	-webkit-background-clip: text;
+	background-clip: text;
+}
+
+@mixin text-bg {
+	background: $bg;
+	-webkit-text-fill-color: transparent;
+	-webkit-background-clip: text;
+	background-clip: text;
+}
