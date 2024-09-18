@@ -71,6 +71,14 @@
 			activitiesList = null;
 		}
 	};
+	const setActivity = async (activity: number) => {
+		try {
+			appointmentData.activity = activity;
+		} catch (error) {
+			error = true;
+			activitiesList = null;
+		}
+	};
 
 	// transition
 	const inTransition: TransitionConfig = { duration: 300, delay: 300 };

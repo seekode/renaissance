@@ -8,7 +8,7 @@
 </script>
 
 <div class="actions">
-	<Button onclick={startAppointment}>Prendre rendez-vous</Button>
+	<Button onclick={startAppointment} shadow={true}>Prendre rendez-vous</Button>
 	<div>
 		<a href="https://renaissance-salon.fr/"><IconMap /> 19 Rue Robert Lebelle </a>
 		<a href="tel:0621240684"><IconPhone /> 06 21 24 06 84 </a>

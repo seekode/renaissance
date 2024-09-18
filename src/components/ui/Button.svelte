@@ -31,7 +31,7 @@
 		transition: 0.5s ease-in-out;
 
 		&.shadow {
-			box-shadow: 0 0 3rem 0.5rem rgba(33, 31, 31, 0.7);
+			box-shadow: $shadow;
 		}
 
 		&:before,
