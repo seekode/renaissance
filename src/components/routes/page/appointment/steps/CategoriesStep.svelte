@@ -1,54 +1,44 @@
 <script lang="ts">
-	import coiffure from '$lib/images/categories_logo/coiffure.svg';
-	import massage from '$lib/images/categories_logo/massage.svg';
-	import manucure from '$lib/images/categories_logo/manucure.png';
-	import esthetique from '$lib/images/categories_logo/esthetique.svg';
-	import epilation from '$lib/images/categories_logo/epilation.svg';
-	import forfait from '$lib/images/categories_logo/forfait.svg';
 	import Button from '$components/ui/Button.svelte';
-	import { AppointmentStep } from '$types/appointmentTypes';
+	import { AppointmentStep, type Category } from '$lib/types/appointmentTypes';
 
 	type Props = {
 		setCategory: (category: number) => void;
 		setStep: (step: AppointmentStep) => void;
+		categories: Category[];
 	};
 
-	const { setCategory, setStep }: Props = $props();
+	const { setCategory, setStep, categories }: Props = $props();
 
-	const buttons = [
-		{ img: coiffure, text: 'Coiffure', id: 2 },
-		{ img: massage, text: 'Massage', id: 3 },
-		{ img: manucure, text: 'Manucure', id: 4 },
-		{ img: esthetique, text: 'Esthétique', id: 5 },
-		{ img: epilation, text: 'Épilation', id: 6 },
-		{ img: forfait, text: 'Forfait', id: 1 }
-	];
-
-	const showButtons = $state(Array(buttons.length).fill(false));
+	const showButtons = $state(Array(categories.length).fill(false));
 
 	let cancelAnimation = false;
+	let isUnmounted = false;
 
 	$effect(() => {
 		if (cancelAnimation) return;
 		setTimeout(() => {
-			buttons.forEach((_, index) => {
+			categories.forEach((_, index) => {
 				setTimeout(() => {
 					if (cancelAnimation) return;
 					showButtons[index] = true;
 				}, index * 200);
 			});
 		}, 800);
+
+		return () => (isUnmounted = true);
 	});
 
 	const onclick = (categoryIndex: number) => {
 		cancelAnimation = true;
 		setCategory(categoryIndex);
-		buttons.forEach((_, index) => {
+		categories.forEach((_, index) => {
 			setTimeout(() => {
-				if (index === buttons.length - 1) {
+				if (isUnmounted) return;
+				if (index === categories.length - 1) {
 					setTimeout(() => setStep(AppointmentStep.ACTIVITY), 500);
 				}
-				showButtons[buttons.length - 1 - index] = false;
+				showButtons[categories.length - 1 - index] = false;
 			}, index * 200);
 		});
 	};
@@ -57,11 +47,11 @@
 <div class="container">
 	<h2>Que pouvons-nous faire pour vous ?</h2>
 	<div class="buttons">
-		{#each buttons as button, index}
+		{#each categories as category, index}
 			<div class:is-visible={showButtons[index]}>
-				<Button onclick={() => onclick(button.id)}>
-					<img src={button.img} alt={button.text} />
-					{button.text}
+				<Button onclick={() => onclick(category.id)} custom>
+					<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+					{category.name}
 				</Button>
 			</div>
 		{/each}

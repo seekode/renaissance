@@ -1,11 +1,10 @@
 <script lang="ts">
-	import line from '$lib/images/index/line.svg';
 </script>
 
 <div class="title">
 	<h1>Renaissance</h1>
 	<p>Là où vous reprenez vie</p>
-	<img src={line} alt="Soulignement du titre" />
+	<img src="images/index/line.svg" alt="Soulignement du titre" />
 </div>
 
 <style lang="scss">

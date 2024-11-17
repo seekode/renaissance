@@ -1,17 +1,22 @@
 <script lang="ts">
 	import IconPhone from '~icons/ion/phone-portrait-outline';
 	import IconMap from '~icons/ion/location-outline';
-
 	import Button from '$components/ui/Button.svelte';
 
-	const { startAppointment }: { startAppointment: () => void } = $props();
+	type Props = {
+		startAppointment: () => void;
+	};
+
+	const { startAppointment }: Props = $props();
 </script>
 
 <div class="actions">
-	<Button onclick={startAppointment} shadow={true}>Prendre rendez-vous</Button>
+	<Button onclick={startAppointment} custom>Prendre rendez-vous</Button>
 	<div>
-		<a href="https://renaissance-salon.fr/"><IconMap /> 19 Rue Robert Lebelle </a>
-		<a href="tel:0621240684"><IconPhone /> 06 21 24 06 84 </a>
+		<a href="https://maps.app.goo.gl/8UZDFUC6t2Kt5gEF6"
+			><IconMap />40 avenue Sainte marguerite 06200</a
+		>
+		<a href="tel:0686245170"><IconPhone />06.86.24.51.70</a>
 	</div>
 </div>
 
@@ -23,7 +28,7 @@
 		align-items: center;
 		gap: 10rem;
 
-		div {
+		> div {
 			width: 100%;
 			display: flex;
 			justify-content: center;

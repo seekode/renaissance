@@ -1,9 +1,9 @@
 enum Env {
 	PROD = 'https://api.renaissance-salon.fr',
-	DEV = 'http://localhost:5000'
+	DEV = 'http://localhost:3000'
 }
 
-const apiUrl = Env.DEV;
+const apiUrl = Env.PROD;
 
 const fetchData = async (
 	method: string,
@@ -31,15 +31,15 @@ const fetchData = async (
 	}
 };
 
-export const get = (route: string, args?: string[]) => fetchData('GET', route, args);
+const get = (route: string, args?: string[]) => fetchData('GET', route, args);
 
-export const post = (route: string, args?: string[], data?: { [key: string]: string }) =>
+const post = (route: string, args?: string[], data?: { [key: string]: string }) =>
 	fetchData('POST', route, args, data);
 
-export const put = (route: string, args?: string[], data?: { [key: string]: string }) =>
+const put = (route: string, args?: string[], data?: { [key: string]: string }) =>
 	fetchData('PUT', route, args, data);
 
-export const del = (route: string, args?: string[], data?: { [key: string]: string }) =>
+const del = (route: string, args?: string[], data?: { [key: string]: string }) =>
 	fetchData('DELETE', route, args, data);
 
 export default { get, post, put, del };

@@ -5,7 +5,7 @@ import { sveltePreprocess } from 'svelte-preprocess';
 const config = {
 	preprocess: sveltePreprocess({
 		scss: {
-			prependData: `@import 'src/lib/scss/variables.scss'; @import 'src/lib/scss/main.scss';`
+			prependData: `@use 'src/lib/scss/variables' as *; @use 'src/lib/scss/main';`
 		},
 		typescript: true
 	}),
@@ -20,9 +20,7 @@ const config = {
 		}),
 		alias: {
 			$lib: 'src/lib',
-			$utils: 'src/utils',
 			$components: 'src/components',
-			$types: 'src/types'
 		}
 	}
 };

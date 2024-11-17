@@ -1,33 +1,29 @@
 <script lang="ts">
-	import home from '$lib/images/index/home.png';
-	import coiffure from '$lib/images/categories_logo/coiffure.svg';
-	import massage from '$lib/images/categories_logo/massage.svg';
-	import manucure from '$lib/images/categories_logo/manucure.png';
-	import esthetique from '$lib/images/categories_logo/esthetique.svg';
-	import epilation from '$lib/images/categories_logo/epilation.svg';
-	import forfait from '$lib/images/categories_logo/forfait.svg';
-
 	import Button from '$components/ui/Button.svelte';
+	import type { Category } from '$lib/types/appointmentTypes';
+	import { fade } from 'svelte/transition';
 
-	const buttons = [
-		{ img: coiffure, text: 'Coiffure' },
-		{ img: massage, text: 'Massage' },
-		{ img: manucure, text: 'Manucure' },
-		{ img: esthetique, text: 'Esthétique' },
-		{ img: epilation, text: 'Épilation' },
-		{ img: forfait, text: 'Forfait' }
-	];
+	type Props = {
+		categories: null | Category[];
+		selectCategory: (category: Category) => void;
+	};
+
+	const { categories, selectCategory }: Props = $props();
 </script>
 
 <section>
-	<img src={home} alt="Home" />
+	<img src="images/index/home.png" alt="Home" />
 	<div>
-		{#each buttons as button}
-			<Button>
-				<img src={button.img} alt={button.text} />
-				{button.text}
-			</Button>
-		{/each}
+		{#if categories}
+			<div transition:fade>
+				{#each categories as category}
+					<Button custom onclick={() => selectCategory(category)}>
+						<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+						{category.name}
+					</Button>
+				{/each}
+			</div>
+		{/if}
 	</div>
 </section>
 
@@ -44,31 +40,36 @@
 		justify-content: space-around;
 
 		> img {
-			height: 100%;
+			height: calc(100% - 20rem);
 			max-width: 90%;
 			margin: 1rem;
 			object-fit: contain;
 			object-position: center;
 		}
 
-		div {
+		> div {
 			width: 90%;
 			height: 20rem;
 			max-width: 50rem;
 			margin: 1rem;
-			display: flex;
-			justify-content: center;
-			align-content: center;
-			flex-wrap: wrap;
-			gap: 1rem;
 
-			:global(button) {
-				height: 3.5rem;
-				width: 13rem;
-				padding: 0.5rem 1rem;
-				font-size: 1.8rem;
-				justify-content: start;
-				gap: 0.5rem;
+			> div {
+				width: 100%;
+				height: 100%;
+				display: flex;
+				justify-content: center;
+				align-content: center;
+				flex-wrap: wrap;
+				gap: 1rem;
+
+				:global(button) {
+					height: 3.5rem;
+					width: 13rem;
+					padding: 0.5rem 1rem;
+					font-size: 1.8rem;
+					justify-content: start;
+					gap: 0.5rem;
+				}
 			}
 		}
 	}
@@ -95,6 +96,10 @@
 				width: 30%;
 				justify-content: space-around;
 				gap: 0;
+
+				> img {
+					height: calc(100% - 31rem);
+				}
 
 				> div {
 					height: 100%;
@@ -136,6 +141,7 @@
 
 			> img {
 				max-height: 90%;
+				height: 100%;
 			}
 
 			> div {

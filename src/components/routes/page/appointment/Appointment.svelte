@@ -2,83 +2,28 @@
 	import IconArrowBack from '~icons/ion/arrow-back';
 	import IconClose from '~icons/ion/close';
 	import IconAccount from '~icons/ion/person';
-	import {
-		AppointmentStep,
-		type ActivitiesList,
-		type AppointmentData
-	} from '$types/appointmentTypes';
-	import AError from '$components/routes/page/appointment/AError.svelte';
-	import ACategoriesStep from '$components/routes/page/appointment/ACategoriesStep.svelte';
+	import { AppointmentStep, type Category } from '$lib/types/appointmentTypes';
 	import Spinner from '$components/ui/Spinner.svelte';
 	import { fade, type TransitionConfig } from 'svelte/transition';
-	import { get } from '$utils/api';
-	import APackagesStep from './APackagesStep.svelte';
+	import ErrorStep from './steps/ErrorStep.svelte';
+	import CategoriesStep from './steps/CategoriesStep.svelte';
+	import ActivitiesStep from './steps/ActivitiesStep.svelte';
+	import createAppointment from './logic/appointment.svelte';
+	import MakerStep from './steps/MakerStep.svelte';
+	import DateStep from './steps/DateStep/DateStep.svelte';
+	import DataStep from './steps/DataStep.svelte';
+	import Summary from './steps/Summary.svelte';
+	import ConfirmStep from './steps/ConfirmStep.svelte';
 
-	const { cancel }: { cancel: () => void } = $props();
-
-	// data of appointment
-	const appointmentData: AppointmentData = {};
-	let error = $state(false);
-	let appointmentSteps = $state<AppointmentStep>(AppointmentStep.CATEGORY);
-	let activitiesList = $state<ActivitiesList | null>(null);
-
-	// if appointment is loading
-	let loading = $derived.by(() => {
-		if (appointmentSteps === AppointmentStep.ACTIVITY && activitiesList === null) return true;
-		return false;
-	});
-
-	// actions of appointment
-	const back = () => {
-		if (appointmentSteps === AppointmentStep.CATEGORY) {
-			cancel();
-		}
-		if (appointmentSteps === AppointmentStep.ACTIVITY) {
-			appointmentSteps = AppointmentStep.CATEGORY;
-		}
-		if (appointmentSteps === AppointmentStep.DATE) {
-			appointmentSteps = AppointmentStep.CATEGORY;
-		}
-		if (appointmentSteps === AppointmentStep.DATA) {
-			appointmentSteps = AppointmentStep.DATE;
-		}
+	type Props = {
+		cancel: () => void;
+		categories: Category[];
+		selectedCategory: null | Category;
 	};
-	const setStep = (step: AppointmentStep) => (appointmentSteps = step);
-	const setCategory = async (category: number) => {
-		try {
-			appointmentData.category = category;
-			activitiesList = null;
-			const response = await get('activities/byCategories', [category.toString()]);
 
-			if (!response || response.server.status !== 200) {
-				error = true;
-				activitiesList = null;
-				return;
-			}
+	const { cancel, categories, selectedCategory }: Props = $props();
 
-			const data = response.json.data as { [key: string]: string }[];
-			const newData: ActivitiesList = {};
-
-			for (const item of data) {
-				if (!newData[item.name_subcategories]) newData[item.name_subcategories] = [];
-
-				newData[item.name_subcategories].push(item);
-			}
-
-			activitiesList = newData;
-		} catch (error) {
-			error = true;
-			activitiesList = null;
-		}
-	};
-	const setActivity = async (activity: number) => {
-		try {
-			appointmentData.activity = activity;
-		} catch (error) {
-			error = true;
-			activitiesList = null;
-		}
-	};
+	const appointment = createAppointment(cancel, selectedCategory);
 
 	// transition
 	const inTransition: TransitionConfig = { duration: 300, delay: 300 };
@@ -87,30 +32,78 @@
 
 <nav>
 	<div>
-		<IconArrowBack onclick={back} />
+		<IconArrowBack onclick={appointment.back} />
 		<IconClose onclick={cancel} />
 	</div>
 	<IconAccount />
 </nav>
-{#if error}
+<!-- ERROR -->
+{#if appointment.error}
 	<div class="container" in:fade={inTransition} out:fade={outTransition}>
-		<AError {setStep} />
+		<ErrorStep restart={appointment.restart} />
 	</div>
-{:else if loading}
+	<!-- LOADING -->
+{:else if appointment.loading}
 	<div class="container" in:fade={inTransition} out:fade={outTransition}>
 		<Spinner />
 	</div>
-{:else if appointmentSteps === AppointmentStep.CATEGORY}
+	<!-- CATEGORIES -->
+{:else if appointment.step === AppointmentStep.CATEGORY}
 	<div class="container" in:fade={inTransition} out:fade={outTransition}>
-		<ACategoriesStep {setCategory} {setStep} />
+		<CategoriesStep
+			{categories}
+			setCategory={appointment.setCategory}
+			setStep={appointment.setStep}
+		/>
 	</div>
-{:else if appointmentSteps === AppointmentStep.ACTIVITY && activitiesList}
+	<!-- ACTIVITIES -->
+{:else if appointment.step === AppointmentStep.ACTIVITY && appointment.activitiesList && appointment.tarifsList}
 	<div class="container" in:fade={inTransition} out:fade={outTransition}>
-		<APackagesStep {activitiesList} />
+		<ActivitiesStep
+			tarifsList={appointment.tarifsList}
+			activitiesList={appointment.activitiesList}
+			setActivity={appointment.setActivity}
+			setStep={appointment.setStep}
+		/>
+	</div>
+	<!-- MAKER -->
+{:else if appointment.step === AppointmentStep.MAKER && appointment.makersList}
+	<div class="container" in:fade={inTransition} out:fade={outTransition}>
+		<MakerStep
+			makersList={appointment.makersList}
+			setMaker={appointment.setMaker}
+			setStep={appointment.setStep}
+		/>
+	</div>
+{:else if appointment.step === AppointmentStep.DATE && appointment.data.maker && appointment.data.activity && appointment.commandsList !== null}
+	<div class="container" in:fade={inTransition} out:fade={outTransition}>
+		<DateStep
+			activity={appointment.data.activity}
+			commandsList={appointment.commandsList}
+			maker={appointment.data.maker}
+			setDate={appointment.setDate}
+			setStep={appointment.setStep}
+		/>
+	</div>
+{:else if appointment.step === AppointmentStep.DATA && appointment.data.date}
+	<div class="container" in:fade={inTransition} out:fade={outTransition}>
+		<DataStep setData={appointment.setData} setStep={appointment.setStep} />
+	</div>
+{:else if appointment.step === AppointmentStep.SUMMARY && appointment.data.data}
+	<div class="container" in:fade={inTransition} out:fade={outTransition}>
+		<Summary
+			appoitment={appointment.data}
+			restart={appointment.restart}
+			submit={appointment.submit}
+		/>
+	</div>
+{:else if appointment.step === AppointmentStep.CONFIRM}
+	<div class="container" in:fade={inTransition} out:fade={outTransition}>
+		<ConfirmStep {cancel} />
 	</div>
 {:else}
 	<div class="container" in:fade={inTransition} out:fade={outTransition}>
-		<AError {setStep} />
+		<ErrorStep restart={appointment.restart} />
 	</div>
 {/if}
 
@@ -139,8 +132,9 @@
 		}
 	}
 	.container {
-		width: 100%;
-		height: calc(100% - 2rem);
+		width: calc(100% - 2rem);
+		height: calc(100% - 4rem);
+		padding: 1rem;
 		position: absolute;
 		top: 2rem;
 		display: flex;

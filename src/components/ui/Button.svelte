@@ -4,34 +4,52 @@
 	type Props = {
 		children: Snippet;
 		onclick?: () => void;
-		shadow?: boolean;
+		disabled?: boolean;
+		custom?: boolean;
+		danger?: boolean;
+		width?: string;
 	};
 
-	let { children, onclick, shadow }: Props = $props();
+	let {
+		children,
+		onclick,
+		disabled = false,
+		custom = false,
+		danger = false,
+		width
+	}: Props = $props();
 </script>
 
-<button {onclick} class:shadow>{@render children()}</button>
+<button {onclick} class:disabled class:custom style:width class:danger>
+	{@render children()}
+</button>
 
 <style lang="scss">
 	button {
-		padding: 0.5rem 2rem;
+		padding: 0.2rem 0.8rem;
 		border: none;
-		font-size: 2rem;
+		font-size: 1.5rem;
 		position: relative;
 		z-index: 1;
 		display: flex;
 		justify-content: center;
 		align-items: center;
 		gap: 1rem;
-		border-radius: 0.9rem;
-		font-family: 'Allura', cursive;
+		border-radius: 0.5rem;
+		font-family: $allura;
 		color: $black;
 		background: $white;
 		cursor: pointer;
 		transition: 0.5s ease-in-out;
 
-		&.shadow {
-			box-shadow: $shadow;
+		&.disabled {
+			cursor: not-allowed;
+			opacity: 0.5;
+		}
+
+		&.disabled:before,
+		&.disabled:after {
+			display: none;
 		}
 
 		&:before,
@@ -42,7 +60,7 @@
 			left: 0;
 			width: 100%;
 			height: 100%;
-			border-radius: 0.9rem;
+			border-radius: 0.5rem;
 			z-index: -1;
 			transition: 0.5s ease-in-out;
 		}
@@ -67,8 +85,27 @@
 		}
 
 		:global(span) {
-			font-family: 'Allura', cursive;
+			font-family: $allura;
 			color: $black;
+		}
+
+		&.danger {
+			background: $danger;
+
+			&:before {
+				background: $danger;
+			}
+		}
+
+		&.custom {
+			font-size: 2rem;
+			padding: 0.5rem 2rem;
+			border-radius: 0.9rem;
+
+			&:before,
+			&:after {
+				border-radius: 0.9rem;
+			}
 		}
 	}
 </style>

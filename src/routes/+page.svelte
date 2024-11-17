@@ -1,11 +1,35 @@
 <script lang="ts">
 	import Actions from '$components/routes/page/Actions.svelte';
-	import Appointment from '$components/routes/page/appointment/Appointment.svelte';
+	import Appointment from '$components/routes/page/Appointment/Appointment.svelte';
 	import PageBackground from '$components/routes/page/PageBackground.svelte';
 	import Title from '$components/ui/Title.svelte';
+	import type { Category } from '$lib/types/appointmentTypes';
+	import api from '$lib/utils/api';
+	import { onMount } from 'svelte';
 	import { fade, fly } from 'svelte/transition';
 
-	let active = false;
+	let active = $state(false);
+
+	let categories: null | Category[] = $state(null);
+	let selectedCategory: null | Category = $state(null);
+
+	const selectCategory = (category: Category) => {
+		selectedCategory = category;
+		active = true;
+		setTimeout(() => {
+			selectedCategory = null;
+		}, 100);
+	};
+
+	onMount(() => {
+		api.get('categories/all').then((response) => {
+			if (!response || response.server.status !== 200) {
+				return;
+			}
+
+			categories = response.json.data;
+		});
+	});
 </script>
 
 <main class:active>
@@ -14,9 +38,9 @@
 			<Title />
 		</div>
 	{/if}
-	{#if active}
+	{#if active && categories}
 		<div class="appointment" in:fade={{ duration: 500, delay: 500 }} out:fade={{ duration: 500 }}>
-			<Appointment cancel={() => (active = false)} />
+			<Appointment {selectedCategory} {categories} cancel={() => (active = false)} />
 		</div>
 	{/if}
 	{#if !active}
@@ -25,7 +49,7 @@
 		</div>
 	{/if}
 </main>
-<PageBackground />
+<PageBackground {selectCategory} {categories} />
 
 <style lang="scss">
 	main {
@@ -47,9 +71,8 @@
 		transition: 0.5s ease-in-out;
 
 		&.active {
-			width: 100%;
-			height: 100%;
-			padding: 0;
+			width: calc(100% - 2rem);
+			height: calc(100% - 2rem);
 			border-radius: 0;
 		}
 
