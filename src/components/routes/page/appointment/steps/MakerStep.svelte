@@ -21,9 +21,9 @@
 		});
 	});
 
-	const onclick = (makerIndex: Maker) => {
+	const onclick = (maker: Maker) => {
 		cancelAnimation = true;
-		setMaker(makerIndex);
+		setMaker(maker);
 		makersList.forEach((_, index) => {
 			setTimeout(() => {
 				if (index === makersList.length - 1) {

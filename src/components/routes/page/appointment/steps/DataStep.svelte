@@ -4,6 +4,8 @@
 	import IconAccount from '~icons/ion/person';
 	import IconPhone from '~icons/ion/ios-call';
 	import { AppointmentStep } from '$lib/types/appointmentTypes';
+	import toast from '$lib/stores/toasts';
+	import { ToastType } from '$lib/types/toastType';
 
 	type Props = {
 		setData: (firstname: string, lastname: string, phone: string) => void;
@@ -54,7 +56,20 @@
 		phone = result.join('.');
 	};
 
-	const submit = () => {
+	const onsubmit = (e: Event) => {
+		e.preventDefault();
+		if (!firstname || !lastname || !phone)
+			return toast({
+				message: 'Veuillez remplir tous les champs',
+				type: ToastType.ERROR
+			});
+
+		if (firstnameError || lastnameError)
+			return toast({
+				message: 'Veuillez corriger tous les champs',
+				type: ToastType.ERROR
+			});
+
 		setData(firstname, lastname, phone);
 		setStep(AppointmentStep.SUMMARY);
 	};
@@ -62,7 +77,7 @@
 
 <div class="container">
 	<h2>Vos informations</h2>
-	<form>
+	<form {onsubmit}>
 		<Input bind:value={firstname} oninput={firstnameFormat} name="Prénom" error={firstnameError}>
 			<IconAccount />
 		</Input>
@@ -73,7 +88,7 @@
 			<IconPhone />
 		</Input>
 		<div>
-			<Button onclick={submit}>Valider</Button>
+			<Button>Valider</Button>
 		</div>
 	</form>
 </div>

@@ -2,22 +2,19 @@
 	import ArrowLeft from '~icons/ion/arrow-left-b';
 	import ArrowRight from '~icons/ion/arrow-right-b';
 	import { fly } from 'svelte/transition';
-	import type { Activity, AppointmentStep, CommandsList, Maker } from '$lib/types/appointmentTypes';
-	import createdateStep from './logic/dateStep.svelte';
+	import createCalendar from './logic/calendar.svelte';
+	import type { CalendarCommandsList } from '$lib/types/CalendarTypes';
 	import Modal from '$components/ui/Modal.svelte';
-	import Button from '$components/ui/Button.svelte';
 
 	type Props = {
-		commandsList: CommandsList | false;
-		maker: Maker;
-		activity: Activity;
-		setDate: (date: Date) => void;
-		setStep: (step: AppointmentStep) => void;
+		planning: CalendarCommandsList;
 	};
 
-	const { commandsList, maker, activity, setDate, setStep }: Props = $props();
+	const { planning }: Props = $props();
 
-	const calendar = createdateStep(commandsList, maker, activity, setDate, setStep);
+	console.log('planning');
+
+	const calendar = createCalendar(planning);
 </script>
 
 <div class="container">
@@ -55,7 +52,8 @@
 							{#each week as day, idDay}
 								<button
 									class:outside={day.isOutside}
-									class:unavailable={!day.available || !calendar.isDayAvailable(idWeek, idDay)}
+									class:unavailable={!day.available}
+									class:filled={day.meet.length > 0}
 									onclick={() => calendar.onSelectDate(idWeek, idDay)}
 								>
 									{day.date.getDate()}
@@ -68,24 +66,18 @@
 		</div>
 	</section>
 </div>
-
-{#if calendar.displayModal && calendar.selectedDay}
-	<Modal title="Choix de l'horaire" width="20rem" onClose={() => (calendar.displayModal = false)}>
+{#if calendar.displayModal}
+	<Modal title={calendar.getDayAndMonth()} onClose={() => (calendar.displayModal = false)}>
 		<div class="modal-content">
-			{#each calendar.calendarGrid[calendar.selectedDay.week][calendar.selectedDay.day].timeSlots as slots}
-				{@const formatedHours = String(slots.hours).padStart(2, '0')}
-				<h3>{formatedHours}:00</h3>
-				{#each slots.minutes as slot}
-					{#if slot}
-						<Button
-							width="8rem"
-							disabled={!slot.available}
-							onclick={() => calendar.onSelectSlote(slots.hours, slot.minutes, slot.available)}
-						>
-							{formatedHours}:{String(slot.minutes).padEnd(2, '0')}
-						</Button>
-					{/if}
-				{/each}
+			{#each calendar.calendarGrid[calendar.selectedDay.week][calendar.selectedDay.day].meet as meet}
+				<div>
+					<h3>{meet.name}</h3>
+					<p>{calendar.getHours(meet.date)}</p>
+					<div>
+						<p>{meet.firstname} {meet.lastname}</p>
+						<p>{meet.phone}</p>
+					</div>
+				</div>
 			{/each}
 		</div>
 	</Modal>
@@ -106,7 +98,7 @@
 			flex-direction: column;
 			align-items: center;
 			border-radius: 0.6rem;
-			box-shadow: $shadow;
+			background: $black;
 
 			.header {
 				margin: 1.5rem 0;
@@ -187,7 +179,7 @@
 
 					div {
 						flex: 1;
-						padding: 0.5rem;
+						padding: 0.25rem;
 						gap: 0.5rem;
 						text-align: center;
 						box-sizing: border-box;
@@ -197,6 +189,7 @@
 							padding: 0.5rem;
 							border: none;
 							position: relative;
+							z-index: 1;
 							display: flex;
 							justify-content: center;
 							align-items: start;
@@ -246,6 +239,7 @@
 									width: 10%;
 									height: 1px;
 									background: $danger;
+									z-index: 1;
 								}
 
 								&::after {
@@ -256,6 +250,10 @@
 								&::before {
 									transform: translate(-50%, -50%) rotate(-45deg);
 								}
+							}
+
+							&.filled {
+								color: $success;
 							}
 						}
 					}
@@ -270,14 +268,20 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
-		gap: 0.5rem;
+		gap: 1rem;
 		overflow-y: scroll;
 
-		h3 {
-			@include allura;
-			@include text-gold;
-			margin-top: 1rem;
-			font-size: 2rem;
+		> div {
+			width: calc(80% - 2rem);
+			padding: 0.5rem 1rem;
+			border: 1px solid $white;
+			display: flex;
+			flex-direction: column;
+			border-radius: 0.5rem;
+
+			> div {
+				margin-top: 3rem;
+			}
 		}
 	}
 

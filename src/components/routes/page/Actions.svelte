@@ -2,16 +2,27 @@
 	import IconPhone from '~icons/ion/phone-portrait-outline';
 	import IconMap from '~icons/ion/location-outline';
 	import Button from '$components/ui/Button.svelte';
+	import type { Category } from '$lib/types/appointmentTypes';
+	import Spinner from '$components/ui/Spinner.svelte';
+	import { fade } from 'svelte/transition';
 
 	type Props = {
 		startAppointment: () => void;
+		categories: null | Category[];
 	};
 
-	const { startAppointment }: Props = $props();
+	const { startAppointment, categories }: Props = $props();
 </script>
 
 <div class="actions">
-	<Button onclick={startAppointment} custom>Prendre rendez-vous</Button>
+	<div>
+		<Button onclick={startAppointment} custom>Prendre rendez-vous</Button>
+		{#if !categories}
+			<div class="loadCat" transition:fade>
+				<Spinner />
+			</div>
+		{/if}
+	</div>
 	<div>
 		<a href="https://maps.app.goo.gl/8UZDFUC6t2Kt5gEF6"
 			><IconMap />40 avenue Sainte marguerite 06200</a
@@ -26,7 +37,17 @@
 		display: flex;
 		flex-direction: column;
 		align-items: center;
+		position: relative;
 		gap: 10rem;
+
+		.loadCat {
+			width: 100%;
+			position: absolute;
+			z-index: 1;
+			top: 0;
+			left: 0;
+			background: $black;
+		}
 
 		> div {
 			width: 100%;

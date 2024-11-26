@@ -1,1 +1,6 @@
+User-agent: *
+Allow: /
 
+Disallow: /workers
+
+Sitemap: https://renaissance-salon.fr/sitemap.xml

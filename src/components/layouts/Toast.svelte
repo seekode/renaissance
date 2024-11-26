@@ -13,7 +13,7 @@
 <section>
 	{#each toastList as toast}
 		<div
-			transition:fly={{ y: 30, duration: 500 }}
+			transition:fly={{ y: -30, duration: 500 }}
 			class="toast {toast.type ? toast.type : 'info'}"
 		>
 			{toast.message}
@@ -26,14 +26,14 @@
 		width: 100%;
 		position: fixed;
 		z-index: 10;
-		bottom: 0;
+		top: 0;
 		left: 50%;
 		transform: translateX(-50%);
 
 		.toast {
 			padding: 1rem;
 			position: absolute;
-			bottom: 1rem;
+			top: 1rem;
 			right: 50%;
 			transform: translateX(50%);
 			background-color: $black;

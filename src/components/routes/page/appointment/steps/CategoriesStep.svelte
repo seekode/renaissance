@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$components/ui/Button.svelte';
+	import Modal from '$components/ui/Modal.svelte';
 	import { AppointmentStep, type Category } from '$lib/types/appointmentTypes';
 
 	type Props = {
@@ -10,7 +11,9 @@
 
 	const { setCategory, setStep, categories }: Props = $props();
 
-	const showButtons = $state(Array(categories.length).fill(false));
+	const displayedCategories = categories.filter((category) => !category.id_categories);
+
+	const showButtons = $state(Array(displayedCategories.length).fill(false));
 
 	let cancelAnimation = false;
 	let isUnmounted = false;
@@ -29,9 +32,21 @@
 		return () => (isUnmounted = true);
 	});
 
-	const onclick = (categoryIndex: number) => {
+	let subCategories: null | Category[] = $state(null);
+
+	const onclick = (category: Category) => {
+		subCategories = null;
+		const newSubCategories = categories.filter(
+			(item) => item.id_categories && item.id_categories == category.id
+		);
+
+		if (newSubCategories.length > 0) {
+			subCategories = newSubCategories;
+			return;
+		}
+
 		cancelAnimation = true;
-		setCategory(categoryIndex);
+		setCategory(category.id);
 		categories.forEach((_, index) => {
 			setTimeout(() => {
 				if (isUnmounted) return;
@@ -47,16 +62,30 @@
 <div class="container">
 	<h2>Que pouvons-nous faire pour vous ?</h2>
 	<div class="buttons">
-		{#each categories as category, index}
+		{#each displayedCategories as category, index}
 			<div class:is-visible={showButtons[index]}>
-				<Button onclick={() => onclick(category.id)} custom>
-					<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+				<Button onclick={() => onclick(category)} custom>
+					{#if category.file}
+						<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+					{/if}
 					{category.name}
 				</Button>
 			</div>
 		{/each}
 	</div>
 </div>
+{#if subCategories}
+	<Modal onClose={() => (subCategories = null)}>
+		{#each subCategories as category, index}
+			<Button onclick={() => onclick(category)} custom>
+				{#if category.file}
+					<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+				{/if}
+				{category.name}
+			</Button>
+		{/each}
+	</Modal>
+{/if}
 
 <style lang="scss">
 	.container {
@@ -98,7 +127,6 @@
 					width: 15rem;
 					padding: 0.5rem 1rem;
 					font-size: 1.8rem;
-					justify-content: start;
 				}
 			}
 		}

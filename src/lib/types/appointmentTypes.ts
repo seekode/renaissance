@@ -1,11 +1,19 @@
 export type Maker = {
 	id: number;
+	id_make: number;
 	firstname: string;
 	lastname: string;
-	start_am: Date;
-	end_am: Date;
-	start_pm: Date;
-	end_pm: Date;
+	schedule: Schedule[];
+};
+
+export type Schedule = {
+	id: number;
+	day: string;
+	start_am: Date | null;
+	end_am: Date | null;
+	start_pm: Date | null;
+	end_pm: Date | null;
+	id_users: number;
 };
 
 export interface AppointmentData {
@@ -33,7 +41,8 @@ export enum AppointmentStep {
 export interface Category {
 	id: number;
 	name: string;
-	file: string;
+	file?: string;
+	id_categories?: number;
 }
 
 export interface Activity {
@@ -45,6 +54,7 @@ export interface Activity {
 	available: number | null;
 	available_after: number | null;
 	after: number;
+	need_call: number;
 	id_subcategories: number;
 	name_subcategories: string;
 }

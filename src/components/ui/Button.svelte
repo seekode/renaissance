@@ -7,7 +7,9 @@
 		disabled?: boolean;
 		custom?: boolean;
 		danger?: boolean;
+		button?: boolean;
 		width?: string;
+		link?: string;
 	};
 
 	let {
@@ -16,16 +18,39 @@
 		disabled = false,
 		custom = false,
 		danger = false,
+		button = false,
+		link,
 		width
 	}: Props = $props();
 </script>
 
-<button {onclick} class:disabled class:custom style:width class:danger>
-	{@render children()}
-</button>
+{#if link}
+	<a
+		class:disabled
+		class:custom
+		style:width
+		class:danger
+		type={button ? 'button' : 'submit'}
+		href={link}
+	>
+		{@render children()}
+	</a>
+{:else}
+	<button
+		{onclick}
+		class:disabled
+		class:custom
+		style:width
+		class:danger
+		type={button ? 'button' : 'submit'}
+	>
+		{@render children()}
+	</button>
+{/if}
 
 <style lang="scss">
-	button {
+	button,
+	a {
 		padding: 0.2rem 0.8rem;
 		border: none;
 		font-size: 1.5rem;
@@ -40,6 +65,7 @@
 		color: $black;
 		background: $white;
 		cursor: pointer;
+		text-decoration: none;
 		transition: 0.5s ease-in-out;
 
 		&.disabled {

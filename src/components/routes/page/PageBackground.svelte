@@ -1,5 +1,6 @@
 <script lang="ts">
 	import Button from '$components/ui/Button.svelte';
+	import Modal from '$components/ui/Modal.svelte';
 	import type { Category } from '$lib/types/appointmentTypes';
 	import { fade } from 'svelte/transition';
 
@@ -9,16 +10,37 @@
 	};
 
 	const { categories, selectCategory }: Props = $props();
+
+	let subCategories: null | Category[] = $state(null);
+
+	const onclick = (category: Category) => {
+		if (!categories) return;
+
+		subCategories = null;
+		const newSubCategories = categories.filter(
+			(item) => item.id_categories && item.id_categories == category.id
+		);
+
+		if (newSubCategories.length > 0) {
+			subCategories = newSubCategories;
+			return;
+		}
+
+		selectCategory(category);
+	};
 </script>
 
 <section>
 	<img src="images/index/home.png" alt="Home" />
 	<div>
 		{#if categories}
+			{@const displayedCategories = categories.filter((category) => !category.id_categories)}
 			<div transition:fade>
-				{#each categories as category}
-					<Button custom onclick={() => selectCategory(category)}>
-						<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+				{#each displayedCategories as category}
+					<Button custom onclick={() => onclick(category)}>
+						{#if category.file}
+							<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+						{/if}
 						{category.name}
 					</Button>
 				{/each}
@@ -26,6 +48,18 @@
 		{/if}
 	</div>
 </section>
+{#if subCategories}
+	<Modal onClose={() => (subCategories = null)}>
+		{#each subCategories as category, index}
+			<Button onclick={() => onclick(category)} custom>
+				{#if category.file}
+					<img src={`images/categories_logo/${category.file}.svg`} alt={category.name} />
+				{/if}
+				{category.name}
+			</Button>
+		{/each}
+	</Modal>
+{/if}
 
 <style lang="scss">
 	section {
@@ -67,7 +101,6 @@
 					width: 13rem;
 					padding: 0.5rem 1rem;
 					font-size: 1.8rem;
-					justify-content: start;
 					gap: 0.5rem;
 				}
 			}
@@ -140,6 +173,7 @@
 			gap: 0;
 
 			> img {
+				max-width: calc(90% - 15rem);
 				max-height: 90%;
 				height: 100%;
 			}
@@ -151,8 +185,14 @@
 		}
 
 		@media (max-height: 950px) {
-			section > div {
-				display: none;
+			section {
+				> img {
+					max-width: 90%;
+				}
+
+				> div {
+					display: none;
+				}
 			}
 		}
 
@@ -169,8 +209,14 @@
 		}
 
 		@media (max-width: 800px) {
-			section > div {
-				display: none;
+			section {
+				> img {
+					max-width: 90%;
+				}
+
+				> div {
+					display: none;
+				}
 			}
 		}
 	}

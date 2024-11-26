@@ -24,6 +24,8 @@
 
 	let moreOptions = $state(false);
 
+	let needCallModal = $state(false);
+
 	$effect(() => {
 		activitiesSections.forEach((_, index) => {
 			setTimeout(() => {
@@ -34,6 +36,8 @@
 	});
 
 	const onclick = (activity: Activity) => {
+		if (activity.need_call) return (needCallModal = true);
+
 		cancelAnimation = true;
 		setActivity(activity);
 
@@ -59,33 +63,37 @@
 					<button onclick={() => onclick(activitie)}>
 						<li>
 							<p>{activitie.name}</p>
-							<div>
-								<span>
-									{#if hours > 0}
-										{hours}h
-									{/if}
-									{#if minutes}
-										{minutes}min
-									{/if}
-									<IconTime />
-								</span>
-							</div>
+							{#if hours > 0 || minutes}
+								<div>
+									<span>
+										{#if hours > 0}
+											{hours}h
+										{/if}
+										{#if minutes}
+											{minutes}min
+										{/if}
+										<IconTime />
+									</span>
+								</div>
+							{/if}
 						</li>
 					</button>
 				{/each}
 			</ul>
 		</div>
 	{/each}
-	<div class:is-visible={activitiesSections[activitiesSections.length - 1]}>
-		<h2>Plus d'option</h2>
-		<ul>
-			<button onclick={() => (moreOptions = true)}>
-				<li>
-					<p>Plus d'option</p>
-				</li>
-			</button>
-		</ul>
-	</div>
+	{#if tarifsList.length > 0}
+		<div class:is-visible={activitiesSections[activitiesSections.length - 1]}>
+			<h2>Tarifs</h2>
+			<ul>
+				<button onclick={() => (moreOptions = true)}>
+					<li>
+						<p>Tarifs</p>
+					</li>
+				</button>
+			</ul>
+		</div>
+	{/if}
 </div>
 {#if moreOptions}
 	<Modal title="Tarifs" width="40rem" onClose={() => (moreOptions = false)}>
@@ -103,8 +111,14 @@
 		</ul>
 		{#snippet footer()}
 			<Button danger onclick={() => (moreOptions = false)}>Fermer</Button>
-			<Button>Appeler</Button>
+			<Button link="tel:06.86.24.51.70">Appeler</Button>
 		{/snippet}
+	</Modal>
+{/if}
+{#if needCallModal}
+	<Modal title="Appel" onClose={() => (needCallModal = false)}>
+		<p style="text-align: center;">Ce type de rendez-vous nécessite un appel.</p>
+		<Button link="tel:06.86.24.51.70">Appeler</Button>
 	</Modal>
 {/if}
 
@@ -120,9 +134,10 @@
 		overflow-y: scroll;
 
 		h2 {
+			padding: 0 1rem;
 			@include allura;
 			@include text-gold;
-			font-size: 4rem;
+			font-size: 3.5rem;
 			margin-bottom: 1rem;
 		}
 
@@ -217,12 +232,12 @@
 			}
 
 			p:nth-child(1) {
-				width: 80%;
+				width: calc(100% - 7rem);
 				border-right: 1px solid $white;
 			}
 
 			p:nth-child(2) {
-				width: 20%;
+				width: 7rem;
 			}
 
 			&.modal-header {
@@ -231,11 +246,17 @@
 
 			&.modal-body {
 				p:nth-child(1) {
-					width: calc(80% - 1rem);
-					padding-left: 1rem;
+					width: calc(100% - 9rem);
+					padding: 0.5rem 1rem;
 					justify-content: start;
 				}
 			}
+		}
+	}
+
+	@media screen and (max-width: 500px) {
+		.modal-content {
+			width: calc(100% - 2px);
 		}
 	}
 </style>

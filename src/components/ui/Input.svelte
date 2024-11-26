@@ -1,23 +1,27 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import type { HTMLInputTypeAttribute } from 'svelte/elements';
 	import { fly } from 'svelte/transition';
 
 	type Props = {
-		children: Snippet;
-		value: string;
+		children?: Snippet;
+		value?: string;
 		name: string;
 		error?: string;
 		oninput?: () => void;
+		type?: HTMLInputTypeAttribute;
 	};
 
-	let { children, value = $bindable(''), name, error, oninput }: Props = $props();
+	let { children, value = $bindable(''), name, error, oninput, type }: Props = $props();
 </script>
 
 <div class="input">
 	<label for={name}>{name} :</label>
 	<div>
-		{@render children()}
-		<input bind:value {oninput} type="text" id={name} {name} placeholder={name} />
+		{#if children}
+			{@render children()}
+		{/if}
+		<input bind:value {oninput} {type} id={name} {name} placeholder={name} />
 	</div>
 	{#if error}
 		<small transition:fly={{ y: -15, duration: 500 }}>{error}</small>
@@ -33,7 +37,7 @@
 		position: relative;
 
 		div {
-			min-width: 17rem;
+			min-width: 16rem;
 			padding: 0.3rem;
 			border: 1px solid $white;
 			display: flex;

@@ -14,14 +14,16 @@
 	import DataStep from './steps/DataStep.svelte';
 	import Summary from './steps/Summary.svelte';
 	import ConfirmStep from './steps/ConfirmStep.svelte';
+	import Modal from '$components/ui/Modal.svelte';
 
 	type Props = {
 		cancel: () => void;
 		categories: Category[];
 		selectedCategory: null | Category;
+		openLogModal: () => void;
 	};
 
-	const { cancel, categories, selectedCategory }: Props = $props();
+	const { cancel, categories, selectedCategory, openLogModal }: Props = $props();
 
 	const appointment = createAppointment(cancel, selectedCategory);
 
@@ -35,8 +37,9 @@
 		<IconArrowBack onclick={appointment.back} />
 		<IconClose onclick={cancel} />
 	</div>
-	<IconAccount />
+	<IconAccount onclick={openLogModal} />
 </nav>
+
 <!-- ERROR -->
 {#if appointment.error}
 	<div class="container" in:fade={inTransition} out:fade={outTransition}>

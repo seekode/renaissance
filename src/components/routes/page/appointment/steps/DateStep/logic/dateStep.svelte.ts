@@ -8,7 +8,7 @@ import {
 } from '$lib/types/appointmentTypes';
 import { ToastType } from '$lib/types/toastType';
 
-export default function createCalendar(
+export default function createDateStep(
 	commandsList: CommandsList | false,
 	maker: Maker,
 	activity: Activity,
@@ -30,6 +30,7 @@ export default function createCalendar(
 		'Décembre'
 	];
 	const days = ['Lun.', 'Mar.', 'Mer.', 'Jeu.', 'Ven.', 'Sam.', 'Dim.'];
+	const enDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 	let displayModal = $state(false);
 	let selectedDay: { week: number; day: number } | false = $state(false);
 
@@ -53,12 +54,17 @@ export default function createCalendar(
 
 		// get wich day is the first day of the month
 		const firstDay = daysInMonth[0].getDay();
+		// Adjust the start of the week to Monday
+		const adjustedFirstDay = firstDay === 0 ? 6 : firstDay - 1;
+
 		// get wich day is the last day of the month
 		const lastDay = daysInMonth[daysInMonth.length - 1].getDay();
+		// Adjust the end of the week to Sunday
+		const adjustedLastDay = lastDay === 0 ? 6 : lastDay - 1;
 
 		// create an array of days in the grid that form the previous month
-		const previousMonthDays = firstDay
-			? Array.from({ length: firstDay }, (_, i) => {
+		const previousMonthDays = adjustedFirstDay
+			? Array.from({ length: adjustedFirstDay }, (_, i) => {
 					const date = new Date(year, month, -i);
 					return { date, isOutside: true };
 				}).reverse()
@@ -66,8 +72,8 @@ export default function createCalendar(
 
 		// create an array of days in the grid that form the next month
 		const nextMonthDays =
-			lastDay < 6
-				? Array.from({ length: 6 - lastDay }, (_, i) => {
+			adjustedLastDay < 6
+				? Array.from({ length: 6 - adjustedLastDay }, (_, i) => {
 						const date = new Date(year, month + 1, i + 1);
 						return { date, isOutside: true };
 					})
@@ -90,9 +96,12 @@ export default function createCalendar(
 			date.date.setHours(0, 0, 0, 0);
 			const available = date.date > today && date.date <= threeMonthsLater;
 
+			const dayString = enDays[date.date.getDay()];
+			const schedule = maker.schedule.find((schedule) => schedule.day === dayString);
+
 			const timeSlots: TimeSlot = [
-				...generateTimeSlots(maker.start_am, maker.end_am, date.date),
-				...generateTimeSlots(maker.start_pm, maker.end_pm, date.date)
+				...generateTimeSlots(schedule!.start_am, schedule!.end_am, date.date),
+				...generateTimeSlots(schedule!.start_pm, schedule!.end_pm, date.date)
 			];
 
 			return { ...date, available, timeSlots };
@@ -173,7 +182,9 @@ export default function createCalendar(
 		return false;
 	};
 
-	const generateTimeSlots = (start: Date, end: Date, day: Date) => {
+	const generateTimeSlots = (start: Date | null, end: Date | null, day: Date) => {
+		if (!start || !end) return [];
+
 		const slots: TimeSlot = [];
 		const current = new Date(start);
 

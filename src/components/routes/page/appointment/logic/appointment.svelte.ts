@@ -1,3 +1,4 @@
+import toast from '$lib/stores/toasts';
 import {
 	AppointmentStep,
 	type ActivitiesList,
@@ -9,6 +10,7 @@ import {
 	type MakersList,
 	type Tarifs
 } from '$lib/types/appointmentTypes';
+import { ToastType } from '$lib/types/toastType';
 import api from '$lib/utils/api';
 
 export default function createAppointment(cancel: () => void, selectedCategory: null | Category) {
@@ -116,13 +118,26 @@ export default function createAppointment(cancel: () => void, selectedCategory: 
 				return date;
 			};
 
-			makersList = response.json.data.map((maker: { [key: string]: string }) => ({
-				...maker,
-				start_am: convertToTime(maker.start_am),
-				end_am: convertToTime(maker.end_am),
-				start_pm: convertToTime(maker.start_pm),
-				end_pm: convertToTime(maker.end_pm)
-			}));
+			makersList = response.json.data.map(
+				(maker: { [key: string]: string | { [key: string]: string }[] }) => {
+					const newMaker = {
+						...maker,
+						schedule: (maker.schedule as { [key: string]: string | null }[]).map((schedule) => {
+							return {
+								id: schedule.id,
+								day: schedule.day,
+								start_am: schedule.start_am ? convertToTime(schedule.start_am) : null,
+								end_am: schedule.end_am ? convertToTime(schedule.end_am) : null,
+								start_pm: schedule.start_pm ? convertToTime(schedule.start_pm) : null,
+								end_pm: schedule.end_pm ? convertToTime(schedule.end_pm) : null,
+								id_users: schedule.id_users
+							};
+						})
+					};
+
+					return newMaker;
+				}
+			);
 		} catch {
 			error = true;
 			activitiesList = null;
@@ -170,7 +185,46 @@ export default function createAppointment(cancel: () => void, selectedCategory: 
 	};
 
 	const submit = async () => {
-		setStep(AppointmentStep.CONFIRM);
+		if (!data.maker) {
+			toast({
+				message: `Une erreur est survenue.`,
+				type: ToastType.ERROR
+			});
+			setStep(AppointmentStep.MAKER);
+			return;
+		}
+		if (!data.date) {
+			toast({
+				message: `Une erreur est survenue.`,
+				type: ToastType.ERROR
+			});
+			setStep(AppointmentStep.DATE);
+			return;
+		}
+		if (!data.data) {
+			toast({
+				message: `Une erreur est survenue.`,
+				type: ToastType.ERROR
+			});
+			setStep(AppointmentStep.DATA);
+			return;
+		}
+
+		const response = await api.post('commands/create', [], {
+			firstname: data.data.firstname,
+			lastname: data.data.lastname,
+			phone: data.data.phone,
+			id_make: data.maker.id_make,
+			date: data.date.toISOString()
+		});
+
+		console.log(response);
+
+		if (response && response.server.status === 200) {
+			setStep(AppointmentStep.CONFIRM);
+		} else {
+			error = true;
+		}
 	};
 
 	if (selectedCategory) setCategory(selectedCategory.id);
